@@ -1,0 +1,67 @@
+<launch>
+  <arg name="gui"        default="true"/>
+  <arg name="world_file" default="$(find turtlebot_mqp)/worlds/playground.world"/>
+  <arg name="base"       value="kobuki"/>
+  <arg name="stacks"     value="hexagons"/>
+  <arg name="3d_sensor"  value="d435"/>
+
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
+  <arg name="initial_pose_a" default="0.0"/>
+
+<!--  ***************** Gazebo World *****************  -->
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time" value="true"/>
+    <arg name="debug" value="false"/>
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="world_name" value="$(arg world_file)"/>
+  </include>
+
+<!--  ***************** Robot Model *****************  -->
+
+  <include file="$(find turtlebot_mqp)/launch/includes/$(arg base).launch.xml">
+    <arg name="base" value="$(arg base)"/>
+    <arg name="stacks" value="$(arg stacks)"/>
+    <arg name="3d_sensor" value="$(arg 3d_sensor)"/>
+  </include>
+
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="30.0" />
+  </node>
+
+  <!--  ************** Navigation  ***************  -->
+  <include file="$(find turtlebot_navigation)/launch/includes/move_base.launch.xml"/>
+
+  <!-- ******* VLP-16 ******* -->
+  <node name="static_transform_publisher_bv" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 base_link velodyne 10" />
+  
+  <!-- <node name="static_transform_publisher_ob" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 odom base_link 10" /> -->
+  
+  <!-- 0.30 0.32 -->
+  <!-- <node name="pointcloud_to_laserscan_publisher" pkg="pointcloud_to_laserscan" type="nodelet" /> -->
+
+  <!-- <include file="$(find turtlebot_navigation)/launch/includes/amcl/amcl.launch.xml">
+    <arg name="scan_topic" value="scan"/>
+    <arg name="use_map_topic" value="true"/>
+    <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+    <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+    <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+  </include>
+  -->
+
+  <!--******* d435 ******* -->
+  <!-- <node pkg="realsense2_description" type="nodelet" name="realsense2_publisher"/>
+  <include file="$(find realsense2_description)/launch/view_d435_model.launch"/> -->
+
+  <!-- <node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" args="manager"/>
+  <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan"
+        args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet laserscan_nodelet_manager">
+    <param name="target_frame" value="camera_pc_frame"/>
+    <param name="range_min" value="0.45"/>
+    <remap from="scan" to="/scan"/>
+  </node> -->
+
+<!--  **************** Visualisation ****************  -->
+ <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_mqp)/rviz/robot_navigation.rviz"/>  
+</launch>
