@@ -4,7 +4,7 @@
   <arg name="map_file"   default="$(find turtlebot_mqp)/maps/playground.yaml"/>
   <arg name="base"       value="kobuki"/>
   <arg name="stacks"     value="hexagons"/>
-  <arg name="3d_sensor"  value="kinect"/>
+  <arg name="3d_sensor"  value="d435"/>
 
   <arg name="initial_pose_x" default="0.0"/>
   <arg name="initial_pose_y" default="0.0"/>
@@ -31,13 +31,17 @@
     <param name="publish_frequency" type="double" value="30.0" />
   </node>
 
- <!--  ************** Navigation  ***************  -->
+  <!--  ************** Navigation  ***************  -->
   <include file="$(find turtlebot_navigation)/launch/includes/move_base.launch.xml"/>
 
   <!--  ****** Maps *****  -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)">
-    <param name="frame_id" value="/map"/>
+    <param name="frame_id" value="map"/>
   </node>
+
+  <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map odom 100" />
+  <!-- 0.30 0.32 -->
+  <!-- <node name="pointcloud_to_laserscan_publisher" pkg="pointcloud_to_laserscan" type="nodelet" /> -->
 
   <include file="$(find turtlebot_navigation)/launch/includes/amcl/amcl.launch.xml">
     <arg name="scan_topic" value="scan"/>
@@ -46,6 +50,14 @@
     <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
     <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
   </include>
+
+  <!-- ******* VLP-16 ******* -->
+  <!-- <node pkg="velodyne_description" type="velodyne_points" name="velodyne_point_publisher"/>
+  <include file="$(find velodyne_description)/launch/example.launch"/> -->
+  
+  <!--******* d435 ******* -->
+  <!-- <node pkg="realsense2_description" type="nodelet" name="realsense2_publisher"/>
+  <include file="$(find realsense2_description)/launch/view_d435_model.launch"/> -->
 
   <!-- Fake laser -->
   <node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" args="manager"/>
@@ -58,7 +70,18 @@
     <remap from="scan" to="/scan"/>
   </node>
 
+  
+
+  <!-- <node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" args="manager"/>
+  <node pkg="nodelet" type="nodelet" name="pointcloud_to_laserscan"
+        args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet laserscan_nodelet_manager">
+    <param name="range_min" value="0.45"/>
+    <remap from="cloud_in" to="/camera/depth/image_raw"/>
+    <remap from="scan" to="/scan"/>
+  </node> -->
+
 <!--  **************** Visualisation ****************  -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_mqp)/rviz/robot_navigation.rviz"/>
+ <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_mqp)/rviz/robot_navigation.rviz"/>  
+ <!--  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_rviz_launchers)/rviz/model.rviz" /> --> 
 
 </launch>
