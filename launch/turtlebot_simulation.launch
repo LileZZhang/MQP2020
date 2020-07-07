@@ -39,7 +39,7 @@
     <param name="frame_id" value="map"/>
   </node>
 
-  <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 map odom 100" />
+  <node name="static_transform_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 base_link map 100" />
   <!-- 0.30 0.32 -->
   <!-- <node name="pointcloud_to_laserscan_publisher" pkg="pointcloud_to_laserscan" type="nodelet" /> -->
 
